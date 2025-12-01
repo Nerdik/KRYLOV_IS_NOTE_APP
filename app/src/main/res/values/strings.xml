@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">all recall</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="title1">Покупки</string>
+    <string name="title2">Работа</string>
+    <string name="title3">Учеба</string>
+    <string name="title4">Личное</string>
+    <string name="title5">Идеи</string>
+    <string name="title6">Планы</string>
+    <string name="title7">Встречи</string>
+
+    <string name="description1">Купить продукты на неделю</string>
+    <string name="description2">Завершить проект до пятницы</string>
+    <string name="description3">Подготовиться к экзамену</string>
+    <string name="description4">Позвонить родителям</string>
+    <string name="description5">Идея для нового приложения</string>
+    <string name="description6">План на следующий месяц</string>
+    <string name="description7">Встреча с друзьями в 15:00</string>
+
+    <string name="add">Add</string>
+    <string name="clear">Clear</string>
+    <string name="update">Update</string>
+    <string name="delete">Delete</string>
+</resources>
