@@ -2,4 +2,6 @@
 <resources>
     <dimen name="noteTitle">20sp</dimen>
     <dimen name="noteText">16sp</dimen>
+    <dimen name="card_margin">8dp</dimen>
+    <dimen name="last_card_margin">150dp</dimen>
 </resources>

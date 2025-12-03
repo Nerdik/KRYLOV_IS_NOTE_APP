@@ -39,11 +39,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.setData(dataSource.getCardData(position));
-        if (position == getItemCount() - 1) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) holder.itemView.getLayoutParams();
-            params.bottomMargin = 150;
-            holder.itemView.setLayoutParams(params);
-        }
+
         Log.d(TAG, "onBindViewHolder");
     }
 
