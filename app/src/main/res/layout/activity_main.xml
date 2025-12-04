@@ -37,6 +37,18 @@
             app:layout_constraintEnd_toEndOf="parent"
             tools:listitem="@layout/item" />
 
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/margin"
+            android:contentDescription="@string/add"
+            app:backgroundTint="@color/fab_color"
+            app:srcCompat="@android:drawable/ic_menu_add"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+            />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -47,5 +59,7 @@
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_header"
         app:menu="@menu/drawer_menu" />
+
+
 
 </androidx.drawerlayout.widget.DrawerLayout>

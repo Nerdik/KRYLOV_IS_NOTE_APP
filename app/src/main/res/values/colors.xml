@@ -6,4 +6,5 @@
     <color name="colorPrimaryDark">#0D47A1</color>
     <color name="colorAccent">#0D47A1</color>
     <color name="cardview_light_background">#F0F0F0</color>
+    <color name="fab_color">#C2E0FF</color>
 </resources>

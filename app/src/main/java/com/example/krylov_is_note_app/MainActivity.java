@@ -2,13 +2,13 @@ package com.example.krylov_is_note_app;
 
 import android.content.Intent;
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -24,18 +24,27 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.krylov_is_note_app.databinding.ActivityMainBinding;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int MY_DEFAULT_DURATION = 1000;
+    private static final String PREFS_NAME = "NoteAppPrefs";
+    private static final String KEY_CARDS = "saved_cards";
 
-    private static ActivityMainBinding binding;
-
+    private ActivityMainBinding binding;
     private ActionBarDrawerToggle drawerToggle;
-
     private CardSource data;
     private MyAdapter adapter;
     private RecyclerView recyclerView;
+    private FloatingActionButton fab;
+    private Gson gson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,9 +76,10 @@ public class MainActivity extends AppCompatActivity {
         binding.drawerLayout.addDrawerListener(drawerToggle);
         drawerToggle.syncState();
 
+        gson = new Gson();
         setupNavigationMenu();
         initView();
-
+        setupFloatingActionButton();
     }
 
     @Override
@@ -80,16 +90,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_add) {
-            data.addCardData(new CardData("Title " + data.size(),
-                    "Note " + data.size()
-                    ));
-            adapter.notifyItemInserted(data.size() - 1);
-            recyclerView.smoothScrollToPosition(data.size() - 1);
-            return true;
-        } else if (item.getItemId() == R.id.action_clear) {
+        if (item.getItemId() == R.id.action_clear) {
             data.clearCardData();
             adapter.notifyDataSetChanged();
+            saveCardsToPrefs();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -97,12 +101,18 @@ public class MainActivity extends AppCompatActivity {
 
     private void initView() {
         recyclerView = findViewById(R.id.recycler_view_lines);
-        data = new CardSourceImpl(getResources()).init();
+
+        List<CardData> savedCards = loadCardsFromPrefs();
+        if (savedCards.isEmpty()) {
+            data = new CardSourceImpl(getResources()).init();
+        } else {
+            data = new CardSourceImpl(getResources()).init(savedCards);
+        }
+
         initRecyclerView();
     }
 
-    private void initRecyclerView(/*RecyclerView recyclerView, CardSource data*/) {
-
+    private void initRecyclerView() {
         recyclerView.setHasFixedSize(true);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -152,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
             if (position != -1) {
                 this.data.updateCardData(position, new CardData(newTitle, newDescription));
                 adapter.notifyItemChanged(position);
+                saveCardsToPrefs();
 
                 recyclerView.scrollToPosition(position);
             }
@@ -175,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (item.getItemId() == R.id.action_delete) {
             data.deleteCardData(position);
             adapter.notifyItemRemoved(position);
+            saveCardsToPrefs();
             return true;
         }
         return super.onContextItemSelected(item);
@@ -194,5 +206,66 @@ public class MainActivity extends AppCompatActivity {
 
             return true;
         });
+    }
+
+    private void setupFloatingActionButton() {
+        fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CardData newCard = new CardData("Title " + data.size(), "Note " + data.size());
+                data.addCardData(newCard);
+                adapter.notifyItemInserted(data.size() - 1);
+                saveCardsToPrefs();
+                recyclerView.smoothScrollToPosition(data.size() - 1);
+            }
+        });
+    }
+
+
+    private void saveCardsToPrefs() {
+        List<CardData> cards = new ArrayList<>();
+        for (int i = 0; i < data.size(); i++) {
+            cards.add(data.getCardData(i));
+        }
+
+        String cardsJson = gson.toJson(cards);
+
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(KEY_CARDS, cardsJson);
+        editor.apply();
+    }
+
+    private List<CardData> loadCardsFromPrefs() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String cardsJson = prefs.getString(KEY_CARDS, null);
+
+        if (cardsJson == null || cardsJson.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        try {
+            Type type = new TypeToken<List<CardData>>(){}.getType();
+            List<CardData> cards = gson.fromJson(cardsJson, type);
+            return cards != null ? cards : new ArrayList<>();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        saveCardsToPrefs();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (binding != null) {
+            binding = null;
+        }
+        super.onDestroy();
     }
 }

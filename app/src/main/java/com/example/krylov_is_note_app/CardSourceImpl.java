@@ -1,7 +1,6 @@
 package com.example.krylov_is_note_app;
 
 import android.content.res.Resources;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,8 +10,8 @@ public class CardSourceImpl implements CardSource {
     private Resources resources;
 
     CardSourceImpl(Resources resources) {
-        dataSource = new ArrayList<>(7);
         this.resources = resources;
+        dataSource = new ArrayList<>();
     }
 
     public CardSourceImpl init() {
@@ -21,6 +20,11 @@ public class CardSourceImpl implements CardSource {
         for (int i = 0; i < descriptions.length; i++) {
             dataSource.add(new CardData(titles[i], descriptions[i]));
         }
+        return this;
+    }
+
+    public CardSourceImpl init(List<CardData> cards) {
+        dataSource = cards;
         return this;
     }
 
@@ -52,5 +56,9 @@ public class CardSourceImpl implements CardSource {
     @Override
     public void clearCardData() {
         dataSource.clear();
+    }
+
+    public List<CardData> getAllCards() {
+        return dataSource;
     }
 }

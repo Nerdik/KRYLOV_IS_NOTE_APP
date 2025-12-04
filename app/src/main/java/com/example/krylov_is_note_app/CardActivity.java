@@ -110,12 +110,6 @@ public class CardActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        saveChangesAndFinish();
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         binding = null;
