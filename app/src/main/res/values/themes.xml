@@ -15,5 +15,12 @@
         <item name="android:windowLightNavigationBar">true</item>
     </style>
 
+    <style name="Theme.MainActivity.Splash" parent="Base.Theme.KRYLOV_IS_NOTE_APP">
+        <item name="android:windowSplashScreenBackground">@android:color/white</item>
+        <item name="android:windowSplashScreenBrandingImage">@drawable/feather</item>
+
+        <item name="android:windowSplashScreenAnimationDuration">1000</item>
+    </style>
+
     <style name="Theme.KRYLOV_IS_NOTE_APP" parent="Base.Theme.KRYLOV_IS_NOTE_APP" />
 </resources>

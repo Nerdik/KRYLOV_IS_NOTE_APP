@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.krylov_is_note_app"
-        minSdk = 24
+        minSdk = 31
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -49,4 +49,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    implementation("androidx.core:core-splashscreen:1.0.0")
 }
