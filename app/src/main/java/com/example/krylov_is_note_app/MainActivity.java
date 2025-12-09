@@ -1,8 +1,13 @@
 package com.example.krylov_is_note_app;
 
+import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -11,12 +16,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.os.CountDownTimer;
 import android.view.ViewTreeObserver;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -39,7 +49,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int MY_DEFAULT_DURATION = 1000;
     private static final String PREFS_NAME = "NoteAppPrefs";
     private static final String KEY_CARDS = "saved_cards";
-
+    private static final String CHANNEL_ID = "CHANNEL_ID";
+    private static final int NOTIFICATION_ID = 42;
     private ActivityMainBinding binding;
     private ActionBarDrawerToggle drawerToggle;
     private CardSource data;
@@ -221,6 +232,7 @@ public class MainActivity extends AppCompatActivity {
                 adapter.notifyItemInserted(data.size() - 1);
                 saveCardsToPrefs();
                 recyclerView.smoothScrollToPosition(data.size() - 1);
+                showNotification();
             }
         });
     }
@@ -303,5 +315,49 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    private void showNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChanell();
+        }
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
+        builder.setSmallIcon(R.drawable.baseline_import_contacts_24)
+                .setContentTitle("New note")
+                .setContentText("Don't forget to update new note!")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ActivityCompat.requestPermissions(
+                        this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        NOTIFICATION_ID);
+            }
+            return;
+        }
+        NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, builder.build());
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == NOTIFICATION_ID && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            showNotification();
+        } else {
+            Toast.makeText(this, "Notification permission is not granted", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void createNotificationChanell() {
+        String name = "Name";
+        String descriptionText = "Description";
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+        channel.setDescription(descriptionText);
+
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
     }
 }
