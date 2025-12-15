@@ -51,4 +51,7 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
 
     implementation("androidx.core:core-splashscreen:1.0.0")
+
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-livedata:2.8.7")
 }

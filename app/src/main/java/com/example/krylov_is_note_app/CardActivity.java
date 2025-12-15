@@ -6,20 +6,17 @@ import android.text.Editable;
 import android.text.TextWatcher;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.material.textfield.TextInputEditText;
 import com.example.krylov_is_note_app.databinding.ActivityCardBinding;
+import com.google.android.material.textfield.TextInputEditText;
 
 public class CardActivity extends AppCompatActivity {
 
     private ActivityCardBinding binding;
     private TextInputEditText editTextTitle;
     private TextInputEditText editTextDescription;
-
-    private int cardPosition;
-    private String originalTitle;
-    private String originalDescription;
-    private boolean isDataChanged = false;
+    private CardViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,11 +25,13 @@ public class CardActivity extends AppCompatActivity {
         binding = ActivityCardBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        viewModel = new ViewModelProvider(this).get(CardViewModel.class);
+
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
-            getSupportActionBar().setTitle("edit note");
+            getSupportActionBar().setTitle("Edit note");
         }
 
         editTextTitle = findViewById(R.id.editTextTitle);
@@ -40,9 +39,11 @@ public class CardActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         if (intent != null) {
-            cardPosition = intent.getIntExtra("CARD_POSITION", -1);
-            originalTitle = intent.getStringExtra("CARD_TITLE");
-            originalDescription = intent.getStringExtra("CARD_DESCRIPTION");
+            int cardPosition = intent.getIntExtra("CARD_POSITION", -1);
+            String originalTitle = intent.getStringExtra("CARD_TITLE");
+            String originalDescription = intent.getStringExtra("CARD_DESCRIPTION");
+
+            viewModel.initData(cardPosition, originalTitle, originalDescription);
 
             editTextTitle.setText(originalTitle);
             editTextDescription.setText(originalDescription);
@@ -50,9 +51,7 @@ public class CardActivity extends AppCompatActivity {
 
         setupTextChangeListeners();
 
-        binding.toolbar.setNavigationOnClickListener(v -> {
-            saveChangesAndFinish();
-        });
+        binding.toolbar.setNavigationOnClickListener(v -> saveChangesAndFinish());
     }
 
     private void setupTextChangeListeners() {
@@ -65,7 +64,8 @@ public class CardActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                checkForChanges();
+                viewModel.updateTitle(editTextTitle.getText().toString().trim());
+                viewModel.updateDescription(editTextDescription.getText().toString().trim());
             }
         };
 
@@ -73,40 +73,24 @@ public class CardActivity extends AppCompatActivity {
         editTextDescription.addTextChangedListener(textWatcher);
     }
 
-    private void checkForChanges() {
-        String currentTitle = editTextTitle.getText().toString().trim();
-        String currentDescription = editTextDescription.getText().toString().trim();
-
-        isDataChanged = !currentTitle.equals(originalTitle) ||
-                !currentDescription.equals(originalDescription);
-    }
-
     private void saveChangesAndFinish() {
-        String newTitle = editTextTitle.getText().toString().trim();
-        String newDescription = editTextDescription.getText().toString().trim();
-
-        if (newTitle.isEmpty()) {
+        if (!viewModel.validateTitle()) {
             editTextTitle.setError("Title cannot be empty");
             editTextTitle.requestFocus();
             return;
         }
 
-        if (isDataChanged) {
+        if (viewModel.isDataChanged()) {
             Intent resultIntent = new Intent();
-            resultIntent.putExtra("CARD_POSITION", cardPosition);
-            resultIntent.putExtra("CARD_TITLE", newTitle);
-            resultIntent.putExtra("CARD_DESCRIPTION", newDescription);
+            resultIntent.putExtra("CARD_POSITION", viewModel.getCardPosition());
+            resultIntent.putExtra("CARD_TITLE", viewModel.getCurrentTitle());
+            resultIntent.putExtra("CARD_DESCRIPTION", viewModel.getCurrentDescription());
             setResult(RESULT_OK, resultIntent);
         } else {
             setResult(RESULT_CANCELED);
         }
 
         finish();
-    }
-
-    @Override
-    public void onBackPressed() {
-        saveChangesAndFinish();
     }
 
     @Override
