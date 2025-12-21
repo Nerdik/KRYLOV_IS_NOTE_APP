@@ -200,7 +200,9 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra("CARD_POSITION", position);
             intent.putExtra("CARD_TITLE", cardData.getTitle());
             intent.putExtra("CARD_DESCRIPTION", cardData.getDescription());
+
             startActivityForResult(intent, REQUEST_CODE_EDIT_NOTE);
+            overridePendingTransition(R.anim.scale_up, R.anim.fade_out);
         }
     }
 

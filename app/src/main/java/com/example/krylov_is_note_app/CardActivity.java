@@ -94,6 +94,11 @@ public class CardActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        saveChangesAndFinish();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         binding = null;
